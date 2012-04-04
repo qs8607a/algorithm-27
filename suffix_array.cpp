@@ -1,12 +1,54 @@
+#include <cmath>
+using namespace std;
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <numeric>
+#include <cstring>
 
+//By chyx111
+typedef long long ll;
+#define Rep(i,n) for(int n_ = (n), i = 0; i< n_; ++i)
+#define two(x) (1<<(x))
+
+template<class T>
+struct RangeMinimumQuery{
+	T *dat[20];
+	int level, n;
+	RangeMinimumQuery(int n)
+		:n(n)
+	{
+		for(level = 0; two(level) <= n; ++level){
+			dat[level] = new T[n];
+		}
+	}
+	void build()
+	{
+		for(int i = 1; i < level; ++i){
+			for(int j = 0; j + two(i - 1) < n; ++j){
+				dat[i][j] = min(dat[i - 1][j], dat[i - 1][j + two(i - 1)]);
+			}
+		}
+	}
+	T query(int from, int to)
+	{
+		int len = to - from + 1;
+		int bit = 31 - __builtin_clz(len);
+		return min(dat[bit][from], dat[bit][to - two(bit) + 1]);
+	}
+	T& operator[](int x){
+		return dat[0][x];
+	}
+};
 struct SuffixArray{
 	//static const int MAXN = 10000;
 	//int bucket[MAXN];
 	//int rank[MAXN], perm[MAXN], work[MAXN], sa[MAXN], height[MAXN];
+	RangeMinimumQuery<int> *rmq;
 	int *rank, *perm, *work, *sa, *height, *bucket;
-	char *str;
+	char const *str;
 	int n;
-	SuffixArray(int _n, char *str)
+	SuffixArray(int _n, char const *str)
 		:str(str)
 	{
 		n = _n + 1;
@@ -20,6 +62,7 @@ struct SuffixArray{
 			work[i] = str[i];
 		}
 		work[n - 1] = 0;
+		rmq = NULL;
 		build_sa();
 	}
 	~SuffixArray(){
@@ -90,9 +133,50 @@ struct SuffixArray{
 			bucket_sz = 0;
 			work[sa[0]] = bucket_sz++;
 			for(int i = 1; i < n; ++i){
-				work[sa[i]] = cmp(rank, sa[i-1], sa[i], step) ? bucket_sz - 1 : bucket_sz++;
+				work[sa[i]] = cmp(rank, sa[i-1], sa[i], step) ? bucket_sz - 1 : bucket_sz++; 
 			}
 			copy(work, work + n, rank);
 		}
 	}
+	int build_rmq()
+	{
+		calc_height();
+		rmq = new RangeMinimumQuery<int>(n);
+		for(int i = 0; i < n; ++i){
+			(*rmq)[i] = height[i];
+		}
+	}
+	int lcp(int x, int y)
+	{
+		int a = rank[x];
+		int b = rank[y];
+		if(a == b){
+			return n - x - 1;
+		}
+		if(a + 1 > b){
+			swap(a, b);
+		}
+		return rmq->query(a + 1, b);
+	}
 };
+
+int main()
+{
+	char const* str = "ababbabbbabababaaa";
+	SuffixArray sa(strlen(str), str);
+	sa.build_rmq();
+	int n = strlen(str);
+	Rep(i, n + 1){
+		cerr << str + sa.sa[i] << endl;
+		cerr << sa.height[i] << endl;
+	}
+	Rep(i, n){
+		for(int j = i; j < n; ++j){
+			cerr << i << " " << j << " " 
+				<< str + i << " "
+				<< str + j << " "
+				<< sa.lcp(i, j) << endl;
+		}
+	}
+}
+
