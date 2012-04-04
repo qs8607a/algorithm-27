@@ -6,6 +6,6 @@ CXXFLAGS=-g
 
 %.run: %.cpp
 #	$(CCREC) $<
-	$(CXX) $(CXXFLAGS) -o $* $<
+	$(CXX) $(CXXFLAGS) $<
 	if ! [ -f $*.in ]; then touch $*.in; fi
 	./$* < $*.in

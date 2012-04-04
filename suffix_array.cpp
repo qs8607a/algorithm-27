@@ -90,7 +90,7 @@ struct SuffixArray{
 			bucket_sz = 0;
 			work[sa[0]] = bucket_sz++;
 			for(int i = 1; i < n; ++i){
-				work[sa[i]] = cmp(rank, sa[i-1], sa[i], step) ? bucket_sz - 1 : bucket_sz++; 
+				work[sa[i]] = cmp(rank, sa[i-1], sa[i], step) ? bucket_sz - 1 : bucket_sz++;
 			}
 			copy(work, work + n, rank);
 		}
