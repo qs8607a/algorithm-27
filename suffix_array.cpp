@@ -145,6 +145,7 @@ struct SuffixArray{
 		for(int i = 0; i < n; ++i){
 			(*rmq)[i] = height[i];
 		}
+		rmq->build();
 	}
 	int lcp(int x, int y)
 	{

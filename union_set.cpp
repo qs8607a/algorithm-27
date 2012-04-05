@@ -1,30 +1,48 @@
 #include "stdinc.h"
 
-int const N = 10000;
-int pnt[N];
-int getpnt(int x){
-    if( pnt[x] < 0 ) return x;
-    return pnt[x] = getpnt( pnt[x] );
-}
-void merge_set(int x, int y){
-    int px = getpnt(x);
-    int py = getpnt(y);
-    if( px == py )return;
-    int sz = pnt[ py ];
-    pnt[ py ] = px;
-    pnt[ px ] += sz;
-}
-
+struct UnionSet{
+	int *pnt;
+	int n;
+	UnionSet(int n)
+		:n(n)
+	{
+		pnt = new int[n];
+		Rep(i, n){
+			pnt[i] = -1;
+		}
+	}
+	~UnionSet()
+	{
+		delete[] pnt;
+	}
+	void merge_set(int x, int y)
+	{
+		int px = get_pnt(x);
+		int py = get_pnt(y);
+		if(px == py){
+			return;
+		}
+		pnt[px] += pnt[py];
+		pnt[py] = px;
+	}
+	int get_pnt(int x)
+	{
+		if(pnt[x] < 0){
+			return x;
+		}
+		return pnt[x] = get_pnt(pnt[x]);
+	}
+};
 
 int main(){
-    memset(pnt,-1,(sizeof pnt));
+	UnionSet union_set(4);
     //1<->2 3
-    merge_set(1, 2);
+    union_set.merge_set(1, 2);
     
-    merge_set(1, 1);
-    assert( pnt[ getpnt(1) ] == -2 );
-    assert( pnt[ getpnt(2) ] == -2 );
-    assert( pnt[ getpnt(3) ] == -1 );
-    assert( getpnt(1) == getpnt(2) );
-    assert( getpnt(1) != getpnt(3) );
+    union_set.merge_set(1, 1);
+    assert( union_set.pnt[ union_set.get_pnt(1) ] == -2 );
+    assert( union_set.pnt[ union_set.get_pnt(2) ] == -2 );
+    assert( union_set.pnt[ union_set.get_pnt(3) ] == -1 );
+    assert( union_set.get_pnt(1) == union_set.get_pnt(2) );
+    assert( union_set.get_pnt(1) != union_set.get_pnt(3) );
 }
