@@ -33,6 +33,61 @@ struct UnionSet{
 		return pnt[x] = get_pnt(pnt[x]);
 	}
 };
+// poj3908
+
+class UnionSet2{  // {{{
+	vector<int> pnt;
+	vector<int> id;
+	int n;
+	public:
+	UnionSet2(int n)
+		:n(n)
+	{
+		id = vector<int>(n);
+		pnt = vector<int>(n);
+		Rep(i, n){
+			id[i] = i;
+			pnt[i] = -1;
+		}
+	}
+	void merge_set(int x, int y)
+	{
+		int px = get_pnt(x);
+		int py = get_pnt(y);
+		if(px == py){
+			return;
+		}
+		pnt[px] += pnt[py];
+		pnt[py] = px;
+	}
+	int get_pnt(int x)
+	{
+		return get_pnt_impl(id[x]);
+	}
+	int get_size(int x)
+	{
+		return -pnt[get_pnt(x)];
+	}
+	void remove(int x)
+	{
+		int old = get_pnt(x);
+		if(pnt[old] == -1){
+			return; // only one element
+		}
+		++pnt[old]; // decrease size
+		id[x] = pnt.size();
+		pnt.push_back(-1);
+	}
+	private:
+	int get_pnt_impl(int x)
+	{
+		if(pnt[x] < 0){
+			return x;
+		}
+		return pnt[x] = get_pnt_impl(pnt[x]);
+	}
+
+}; // }}}
 
 int main(){
 	UnionSet union_set(4);
